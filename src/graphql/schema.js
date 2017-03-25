@@ -4,6 +4,7 @@ import {
   GraphQLID,
   GraphQLString,
   GraphQLList,
+  GraphQLNonNull,
 } from 'graphql';
 
 const PersonType = new GraphQLObjectType({
@@ -25,7 +26,14 @@ const QueryType = new GraphQLObjectType({
   fields: {
     people: {
       type: new GraphQLList(PersonType),
-      resolve: () => peopleData,
+      args: {
+        name: {
+          type: new GraphQLNonNull(GraphQLString),
+        },
+      },
+      resolve(root, { name }) {
+        return peopleData;
+      },
     },
   },
 });

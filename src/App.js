@@ -3,7 +3,7 @@ import { gql, graphql } from 'react-apollo';
 
 class App extends Component {
   render() {
-    const { data: { loading, people } } = this.props;
+
     return (
       <main>
         <header>
@@ -20,27 +20,40 @@ class App extends Component {
             Currently the schema just serves a list of people with names and ids.
           </p>
         </header>
-        {loading ? (
-          <p>Loading…</p>
-        ) : (
-          <ul>
-            {people.map(person => (
-              <li key={person.id}>
-                {person.name}
-              </li>
-            ))}
-          </ul>
-        )}
+        <button onClick={() => this.props.fetchName('Anna')}>Ask for Anna</button>
       </main>
     );
   }
 }
 
 export default graphql(
-  gql`{
-    people {
-      id
-      name
-    }
-  }`,
-)(App)
+  gql`
+    query names ($name: String!) {
+      people (name: $name) {
+        id
+        name
+      }
+    }`, {
+    options: (props) => ({
+      variables: {
+        name: "Alfonso",
+      },
+    }),
+    props({ data }) {
+      return {
+        data,
+        fetchName(newName) {
+          return data.fetchMore({
+            variables: {
+              name: newName,
+            },
+            updateQuery(prev, { queryVariables }) {
+              if (newName !== queryVariables.name) {
+                console.error(`newName: (${newName}) !== queryVariables.name (${queryVariables.name})`)
+              }
+            },
+          })
+        }
+      };
+    },
+  })(App)
